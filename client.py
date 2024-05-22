@@ -13,11 +13,11 @@ ADDR = (SERVER, PORT)
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 
-
 class Game:
     # class for tic-tac-toe game
-    def __init__(self):
+    def __init__(self, nickname):
         self.positions = [x for x in range(1, 10)]
+        self.nickname = nickname
     
     # sets the client's symbol to X or O, received from server
     def set_symbol(self, symbol):
@@ -32,7 +32,7 @@ class Game:
 
     # if it is your turn, do the turn
     def run_game(self):
-        if self.turn == True:
+        if self.turn:
             self.show_board()
             self.get_user_input()
 
@@ -150,19 +150,34 @@ def send(msg):
 # receives input from other client through server, sends to game's receive_user_input function
 def receive():
     count = 0
-    game = Game()
+    game = Game(nickname)
     while True:
         if count != 0:
             print('Waiting for opponent...')
-        msg = client.recv(HEADER).decode(FORMAT)
-        if msg:
+        msg_length = client.recv(HEADER).decode(FORMAT)
+        if msg_length:
+            msg_length = int(msg_length)
+            msg = client.recv(msg_length).decode(FORMAT)
             if count != 0:
+                if msg[0] == 'W':
+                    print(f'\n{msg[1:]} wins!')
+                    send(DISCONNECT_MESSAGE)
+                    quit()
                 game.receive_user_input(msg)
             else:
                 game.set_symbol(msg[0])
                 game.set_turn(msg[1])
                 start_game(game)
                 count += 1
+
+# get the client's nickname
+nickname = input("Enter your nickname: ")
+nickname_message = nickname.encode(FORMAT)
+nickname_length = len(nickname_message)
+send_length = str(nickname_length).encode(FORMAT)
+send_length += b' ' * (HEADER - len(send_length))
+client.send(send_length)
+client.send(nickname_message)
 
 # create and start thread
 t = threading.Thread(target=receive)
