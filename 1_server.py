@@ -1,7 +1,9 @@
 import socket
 import threading
+import atexit
 import random
 import time
+import json
 
 class TicTacToeServer:
     def __init__(self, host='0.0.0.0', port=12345):
@@ -12,9 +14,30 @@ class TicTacToeServer:
         self.players = []
         self.board = [' ' for _ in range(9)]
         self.current_turn = 0
+        self.scoreboard = self.load_scoreboard()
         self.lock = threading.Lock()
         self.game_active = False
         print("Server started, waiting for players...")
+    
+    def load_scoreboard(self):
+        with open('scoreboard.json', 'r') as file:
+            return json.load(file)
+
+    def save_scoreboard(self):
+        with open('scoreboard.json', 'w') as file:
+            json.dump(self.scoreboard, file, indent=4)
+
+    def add_points_for_winner(self, nickname):
+        found = False
+        for entry in self.scoreboard:
+            if entry['nickname'] == nickname:
+                print(f"Adding 1 point for {nickname}.")
+                entry['score'] += 1
+                found = True
+                break
+        if not found:
+            print(f"Adding new player: {nickname}.")
+            self.scoreboard.append({'nickname': nickname, 'score': 1})
 
     def start(self):
         threading.Thread(target=self.accept_clients, daemon=True).start()
@@ -135,9 +158,13 @@ class TicTacToeServer:
                 board_display += "---------\n"
         self.broadcast(board_display)
 
+def on_exit(server):
+    server.save_scoreboard()
+
 if __name__ == "__main__":
     server = TicTacToeServer()
     server.start()
+    atexit.register(on_exit,server)
     while True:
         time.sleep(1)
 
