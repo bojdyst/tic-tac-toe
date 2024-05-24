@@ -66,6 +66,7 @@ def handle_client(conn, addr, clients, nicknames):
         except:
             connected = False
     
+    print(nicknames)
     conn.close()
     clients.remove(conn)
     del nicknames[conn]
