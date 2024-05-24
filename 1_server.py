@@ -5,8 +5,31 @@ import random
 import time
 import json
 
+PORT = 5050
+SERVER = '0.0.0.0'
+ADDR = (SERVER, PORT)
+FORMAT = 'utf-8'
+DISCOVERY_PORT = 5051
+MULTICAST_GROUP = '224.0.0.1'
+
+def handle_discovery():
+    discovery_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    discovery_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    discovery_socket.bind(('', DISCOVERY_PORT))
+    group = socket.inet_aton(MULTICAST_GROUP)
+    mreq = group + socket.inet_aton('0.0.0.0')
+    discovery_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+    
+    while True:
+        data, addr = discovery_socket.recvfrom(1024)
+        if data.decode(FORMAT) == "DISCOVER_SERVER":
+            discovery_socket.sendto(f"{SERVER}:{PORT}".encode(FORMAT), addr)
+
+discovery_thread = threading.Thread(target=handle_discovery, daemon=True)
+discovery_thread.start()
+
 class TicTacToeServer:
-    def __init__(self, host='0.0.0.0', port=12345):
+    def __init__(self, host=SERVER, port=PORT):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_socket.bind((host, port))

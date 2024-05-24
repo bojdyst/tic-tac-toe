@@ -2,8 +2,40 @@ import socket
 import threading
 import os
 
+import socket
+import threading
+import os
+
+PORT = 5050
+FORMAT = 'utf-8'
+DISCOVERY_PORT = 5051
+MULTICAST_GROUP = '224.0.0.1'
+MAX_DISCOVERY_ATTEMPTS = 3  # Maximum number of discovery attempts
+
+def discover_server():
+    discovery_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    discovery_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+    discovery_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    message = "DISCOVER_SERVER".encode(FORMAT)
+    attempts = 0
+    while attempts < MAX_DISCOVERY_ATTEMPTS:
+        try:
+            discovery_socket.sendto(message, (MULTICAST_GROUP, DISCOVERY_PORT))
+            discovery_socket.settimeout(2)
+            data, server_address = discovery_socket.recvfrom(1024)
+            server_ip, server_port = data.decode(FORMAT).split(':')
+            return server_ip, int(server_port)
+        except socket.timeout:
+            attempts += 1
+            print("Server discovery timed out. Retrying...")
+    print("Server discovery failed after {} attempts.".format(MAX_DISCOVERY_ATTEMPTS))
+    return None, None
+
+SERVER, PORT = discover_server()
+
 class TicTacToeClient:
-    def __init__(self, host='localhost', port=12345):
+    def __init__(self, host=SERVER, port=PORT):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect((host, port))
         self.nickname = input("Enter your nickname: ")
