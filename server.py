@@ -1,7 +1,9 @@
+from flask import Flask, render_template
 import socket
 import threading
 import logging
-from flask import Flask, render_template
+import atexit
+import json
 
 # set starting details to make connection and decode messages
 HEADER = 64
@@ -107,16 +109,38 @@ def start():
         
         logging.info(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
 
+
+
+def add_points_for_winner(nickname, scoreboard):
+    found = False
+    for entry in scoreboard:
+        if entry['nickname'] == nickname:
+            logging.info(f"Adding 1 point for {nickname}.")
+            entry['score'] += 1
+            found = True
+            break
+    if not found:
+        logging.info(f"Adding new player: {nickname}.")
+        scoreboard.append({'nickname': nickname, 'score': 1})
+
+# Ścieżka do pliku JSON
+JSON_FILE_PATH = 'scoreboard.json'
+
+def load_scoreboard():
+    with open(JSON_FILE_PATH, 'r') as file:
+        return json.load(file)
+
+def save_scoreboard(scoreboard):
+    with open(JSON_FILE_PATH, 'w') as file:
+        json.dump(scoreboard, file, indent=4)
+
+
+logging.basicConfig(level=logging.INFO)
+
+scoreboard = load_scoreboard()
+
 app = Flask(__name__)
-
-# Przykładowe dane do tabeli
-scoreboard = [
-    {'nickname': 'Alice', 'score': 120},
-    {'nickname': 'Bob', 'score': 95},
-    {'nickname': 'Charlie', 'score': 110},
-    {'nickname': 'Diana', 'score': 130}
-]
-
+        
 @app.route('/')
 def index():
     return render_template('scoreboard.html', scoreboard=scoreboard)
@@ -128,9 +152,17 @@ def run_flask():
 flask_thread = threading.Thread(target=run_flask)
 flask_thread.start()
 
+add_points_for_winner('Marcin', scoreboard)
+# Funkcja do zapisywania scoreboard podczas wyłączania programu
+def on_exit():
+    global scoreboard
+    save_scoreboard(scoreboard)
+
+# Rejestracja funkcji on_exit, aby była wykonywana przy zamykaniu programu
+atexit.register(on_exit)
+
+logging.info("[STARTING] server is starting...")
 # start and bind server socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(ADDR)
-logging.basicConfig(level=logging.INFO)
-logging.info("[STARTING] server is starting...")
 start()
