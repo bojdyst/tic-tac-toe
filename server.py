@@ -3,6 +3,20 @@ import threading
 import logging
 from flask import Flask, render_template
 
+# set starting details to make connection and decode messages
+HEADER = 64
+PORT = 5050
+SERVER = socket.gethostbyname(socket.gethostname())
+ADDR = (SERVER, PORT)
+FORMAT = 'utf-8'
+DISCONNECT_MESSAGE = "disconnected"
+DISCOVERY_PORT = 5051
+MULTICAST_GROUP = '224.0.0.1'
+
+# start and bind server socket
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind(ADDR)
+
 def send_message(msg, clients, conn):
     # sends message to client that it did not receive the message from
     for client in clients:
@@ -44,7 +58,7 @@ def handle_client(conn, addr, clients, nicknames):
                 msg = conn.recv(msg_length).decode(FORMAT)
                 if msg == DISCONNECT_MESSAGE:
                     connected = False
-                logging.info(f"[{addr}] {msg}")
+                logging.info(f"[{addr}-{nickname}] {msg}")
                 if connected:
                     send_message(msg, clients, conn)
         except:
@@ -54,21 +68,36 @@ def handle_client(conn, addr, clients, nicknames):
     clients.remove(conn)
     del nicknames[conn]
 
+def handle_discovery():
+    discovery_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    discovery_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    discovery_socket.bind(('', DISCOVERY_PORT))
+    group = socket.inet_aton(MULTICAST_GROUP)
+    mreq = group + socket.inet_aton('0.0.0.0')
+    discovery_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+    
+    while True:
+        data, addr = discovery_socket.recvfrom(1024)
+        if data.decode(FORMAT) == "DISCOVER_SERVER":
+            discovery_socket.sendto(f"{SERVER}:{PORT}".encode(FORMAT), addr)
+
 def start():
     # beginning, waits for client connections and calls the function to send the clients their starting information
     clients = []
     nicknames = {}
-    #symbols = ['O', 'X']
-    #turns = ['0', '1']
     s.listen(2)
     logging.info(f'Server is listening on {SERVER}')
+    
+    discovery_thread = threading.Thread(target=handle_discovery, daemon=True)
+    discovery_thread.start()
+    
     while True:
         conn, addr = s.accept()
         clients.append(conn)
         
         t = threading.Thread(target=handle_client, args=(conn, addr, clients, nicknames))
         t.start()
-        
+
         symbols = ['O', 'X']
         turns = ['0', '1']
         
@@ -77,14 +106,6 @@ def start():
                 send_client_start(client, symbols.pop(0) + turns.pop(0))
         
         logging.info(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
-
-# set starting details to make connection and decode messages
-HEADER = 64
-PORT = 5050
-SERVER = socket.gethostbyname(socket.gethostname())
-ADDR = (SERVER, PORT)
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "disconnected"
 
 app = Flask(__name__)
 

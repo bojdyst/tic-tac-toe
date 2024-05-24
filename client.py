@@ -6,7 +6,29 @@ HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "disconnected"
-SERVER = '127.0.1.1' # set server to IP address provided by server when server is started
+DISCOVERY_PORT = 5051
+MULTICAST_GROUP = '224.0.0.1'
+
+def discover_server():
+    discovery_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    discovery_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+    discovery_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    message = "DISCOVER_SERVER".encode(FORMAT)
+    discovery_socket.sendto(message, (MULTICAST_GROUP, DISCOVERY_PORT))
+
+    while True:
+        try:
+            discovery_socket.settimeout(2)
+            data, server_address = discovery_socket.recvfrom(1024)
+            server_ip, server_port = data.decode(FORMAT).split(':')
+            return server_ip, int(server_port)
+        except socket.timeout:
+            print("Server discovery timed out. Retrying...")
+            discovery_socket.sendto(message, (MULTICAST_GROUP, DISCOVERY_PORT))
+
+# Discover server
+SERVER, PORT = discover_server()
 ADDR = (SERVER, PORT)
 
 # start and bind client socket 
