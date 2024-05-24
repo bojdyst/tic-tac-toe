@@ -1,17 +1,7 @@
 import socket
 import threading
-
-# set starting details to make connection and decode messages
-HEADER = 64
-PORT = 5050
-SERVER = socket.gethostbyname(socket.gethostname())
-ADDR = (SERVER, PORT)
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "disconnected"
-
-# start and bind server socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(ADDR)
+import logging
+from flask import Flask, render_template
 
 def send_message(msg, clients, conn):
     # sends message to client that it did not receive the message from
@@ -35,7 +25,7 @@ def send_client_start(conn, item):
 
 def handle_client(conn, addr, clients, nicknames):
     # receives messages from clients and sends to opposite client
-    print(f"[NEW CONNECTION] {addr} connected")
+    logging.info(f"[NEW CONNECTION] {addr} connected")
     
     # Get the nickname from the client
     nickname_length = conn.recv(HEADER).decode(FORMAT)
@@ -43,7 +33,7 @@ def handle_client(conn, addr, clients, nicknames):
         nickname_length = int(nickname_length)
         nickname = conn.recv(nickname_length).decode(FORMAT)
         nicknames[conn] = nickname
-        print(f"[NEW NICKNAME] {nickname} connected")
+        logging.info(f"[NEW NICKNAME] {nickname} connected")
     
     connected = True
     while connected:
@@ -54,7 +44,7 @@ def handle_client(conn, addr, clients, nicknames):
                 msg = conn.recv(msg_length).decode(FORMAT)
                 if msg == DISCONNECT_MESSAGE:
                     connected = False
-                print(f"[{addr}] {msg}")
+                logging.info(f"[{addr}] {msg}")
                 if connected:
                     send_message(msg, clients, conn)
         except:
@@ -68,10 +58,10 @@ def start():
     # beginning, waits for client connections and calls the function to send the clients their starting information
     clients = []
     nicknames = {}
-    symbols = ['O', 'X']
-    turns = ['0', '1']
+    #symbols = ['O', 'X']
+    #turns = ['0', '1']
     s.listen(2)
-    print(f'Server is listening on {SERVER}')
+    logging.info(f'Server is listening on {SERVER}')
     while True:
         conn, addr = s.accept()
         clients.append(conn)
@@ -79,11 +69,47 @@ def start():
         t = threading.Thread(target=handle_client, args=(conn, addr, clients, nicknames))
         t.start()
         
+        symbols = ['O', 'X']
+        turns = ['0', '1']
+        
         if len(clients) == 2:
             for client in clients:
                 send_client_start(client, symbols.pop(0) + turns.pop(0))
         
-        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
+        logging.info(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
 
-print("[STARTING] server is starting...")
+# set starting details to make connection and decode messages
+HEADER = 64
+PORT = 5050
+SERVER = socket.gethostbyname(socket.gethostname())
+ADDR = (SERVER, PORT)
+FORMAT = 'utf-8'
+DISCONNECT_MESSAGE = "disconnected"
+
+app = Flask(__name__)
+
+# Przykładowe dane do tabeli
+scoreboard = [
+    {'nickname': 'Alice', 'score': 120},
+    {'nickname': 'Bob', 'score': 95},
+    {'nickname': 'Charlie', 'score': 110},
+    {'nickname': 'Diana', 'score': 130}
+]
+
+@app.route('/')
+def index():
+    return render_template('scoreboard.html', scoreboard=scoreboard)
+
+def run_flask():
+    app.run(debug=True, host='0.0.0.0', use_reloader=False)
+
+# Uruchomienie aplikacji Flask w osobnym wątku
+flask_thread = threading.Thread(target=run_flask)
+flask_thread.start()
+
+# start and bind server socket
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind(ADDR)
+logging.basicConfig(level=logging.INFO)
+logging.info("[STARTING] server is starting...")
 start()

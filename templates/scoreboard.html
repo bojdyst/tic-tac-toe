@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoreboard</title>
+    <style>
+        table {
+            width: 50%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 18px;
+            text-align: left;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Scoreboard</h1>
+    <table>
+        <tr>
+            <th>Nickname</th>
+            <th>Score</th>
+        </tr>
+        {% for entry in scoreboard %}
+        <tr>
+            <td>{{ entry.nickname }}</td>
+            <td>{{ entry.score }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
