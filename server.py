@@ -6,6 +6,8 @@ import atexit
 import random
 import time
 import json
+import os
+from datetime import datetime
 
 PORT = 5050
 SERVER = '0.0.0.0'
@@ -40,11 +42,26 @@ class TicTacToeServer:
         self.board = [' ' for _ in range(9)]
         self.current_turn = 0
         self.scoreboard = self.load_scoreboard()
+        self.history = self.load_history()
         self.lock = threading.Lock()
         self.game_active = False
         logging.info("Server started, waiting for players...")
-    
+
+    def load_history(self):
+        if not os.path.exists('history.json'):
+            with open('history.json', 'w') as file:
+                json.dump([], file)
+        with open('history.json', 'r') as file:
+            return json.load(file)
+
+    def save_history(self):
+        with open('history.json', 'w') as file:
+            json.dump(self.history, file, indent=4)
+
     def load_scoreboard(self):
+        if not os.path.exists('scoreboard.json'):
+            with open('scoreboard.json', 'w') as file:
+                json.dump([], file)
         with open('scoreboard.json', 'r') as file:
             return json.load(file)
 
@@ -52,24 +69,32 @@ class TicTacToeServer:
         with open('scoreboard.json', 'w') as file:
             json.dump(self.scoreboard, file, indent=4)
 
-    def increment_points(self, nickname):
+    def update_flask(self, winner, loser):
         found = False
+        # Adds point for a winner
         for entry in self.scoreboard:
-            if entry['nickname'] == nickname:
-                logging.info(f"+1 point for {nickname}.")
+            if entry['nickname'] == winner:
+                logging.info(f"+1 point for {winner}.")
                 entry['score'] += 1
                 found = True
                 break
         if not found:
-            logging.info(f"Adding new player: {nickname}.")
-            self.scoreboard.append({'nickname': nickname, 'score': 1})
-
-    def decrement_points(self, nickname):
+            logging.info(f"Adding new player: {winner}.")
+            self.scoreboard.append({'nickname': winner, 'score': 1})
+        
+        # Removes point for a loser
         for entry in self.scoreboard:
-            if entry['nickname'] == nickname:
-                logging.info(f"-1 point for {nickname}.")
+            if entry['nickname'] == loser:
+                logging.info(f"-1 point for {loser}.")
                 entry['score'] -= 1
-                break
+
+        # Updates history
+        game_result = {
+            'nicknames': f"{winner}-{loser}",
+            'winner': winner,
+            'date': datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        self.history.append(game_result)
 
     def start(self):
         threading.Thread(target=self.accept_clients, daemon=True).start()
@@ -123,8 +148,8 @@ class TicTacToeServer:
                             self.broadcast(f"Game over! Winner: {nickname}\n")
                             for _, n in self.players:
                                 if n != nickname:
-                                    self.decrement_points(n)
-                            self.increment_points(nickname)
+                                    loser = n
+                            self.update_flask(nickname, loser)
                             self.game_active = False
                         elif ' ' not in self.board:
                             self.broadcast("Game over! It's a draw!\n")
@@ -200,6 +225,7 @@ class TicTacToeServer:
 
 def on_exit(server):
     server.save_scoreboard()
+    server.save_history()
 
 if __name__ == "__main__":
     logging.basicConfig(filename='server.log', level=logging.INFO)
@@ -209,9 +235,18 @@ if __name__ == "__main__":
     app = Flask(__name__)
         
     @app.route('/')
-    def index():
+    def indexMain():
+        return render_template('main.html')
+
+    @app.route('/scoreboard')
+    def indexScoreboard():
         server.scoreboard.sort(key=lambda x: x['score'], reverse=True)
         return render_template('scoreboard.html', scoreboard=server.scoreboard)
+
+    @app.route('/history')
+    def indexHistory():
+        server.history.sort(key=lambda x: x['date'], reverse=True)
+        return render_template('history.html', history=server.history)
 
     def run_flask():
         app.run(debug=True, host='0.0.0.0', use_reloader=False)

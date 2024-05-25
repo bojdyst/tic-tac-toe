@@ -8,19 +8,43 @@
         "score": 11
     },
     {
-        "nickname": "Bob",
-        "score": 1
+        "nickname": "Tomek",
+        "score": 3
     },
     {
         "nickname": "Alice",
         "score": 2
     },
     {
+        "nickname": "Bob",
+        "score": 1
+    },
+    {
         "nickname": "Asa",
         "score": 1
     },
     {
+        "nickname": "Salata",
+        "score": 1
+    },
+    {
+        "nickname": "Halo",
+        "score": 1
+    },
+    {
+        "nickname": "Ciul",
+        "score": 1
+    },
+    {
+        "nickname": "AAA",
+        "score": 1
+    },
+    {
+        "nickname": "Ala",
+        "score": 0
+    },
+    {
         "nickname": "Konrad",
-        "score": -1
+        "score": 0
     }
 ]
