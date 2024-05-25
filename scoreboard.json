@@ -1,22 +1,26 @@
 [
     {
-        "nickname": "Alice",
-        "score": 1
-    },
-    {
-        "nickname": "Bob",
-        "score": 2
+        "nickname": "Marcin",
+        "score": 19
     },
     {
         "nickname": "Charlie",
         "score": 11
     },
     {
-        "nickname": "Marcin",
-        "score": 15
+        "nickname": "Bob",
+        "score": 1
+    },
+    {
+        "nickname": "Alice",
+        "score": 2
+    },
+    {
+        "nickname": "Asa",
+        "score": 1
     },
     {
         "nickname": "Konrad",
-        "score": 1
+        "score": -1
     }
 ]

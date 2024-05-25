@@ -1,4 +1,6 @@
+from flask import Flask, render_template
 import socket
+import logging
 import threading
 import atexit
 import random
@@ -40,7 +42,7 @@ class TicTacToeServer:
         self.scoreboard = self.load_scoreboard()
         self.lock = threading.Lock()
         self.game_active = False
-        print("Server started, waiting for players...")
+        logging.info("Server started, waiting for players...")
     
     def load_scoreboard(self):
         with open('scoreboard.json', 'r') as file:
@@ -50,17 +52,24 @@ class TicTacToeServer:
         with open('scoreboard.json', 'w') as file:
             json.dump(self.scoreboard, file, indent=4)
 
-    def add_points_for_winner(self, nickname):
+    def increment_points(self, nickname):
         found = False
         for entry in self.scoreboard:
             if entry['nickname'] == nickname:
-                print(f"Adding 1 point for {nickname}.")
+                logging.info(f"+1 point for {nickname}.")
                 entry['score'] += 1
                 found = True
                 break
         if not found:
-            print(f"Adding new player: {nickname}.")
+            logging.info(f"Adding new player: {nickname}.")
             self.scoreboard.append({'nickname': nickname, 'score': 1})
+
+    def decrement_points(self, nickname):
+        for entry in self.scoreboard:
+            if entry['nickname'] == nickname:
+                logging.info(f"-1 point for {nickname}.")
+                entry['score'] -= 1
+                break
 
     def start(self):
         threading.Thread(target=self.accept_clients, daemon=True).start()
@@ -68,7 +77,7 @@ class TicTacToeServer:
     def accept_clients(self):
         while True:
             client_socket, addr = self.server_socket.accept()
-            print(f"Player connected from {addr}")
+            logging.info(f"Player connected from {addr}")
             threading.Thread(target=self.handle_client, args=(client_socket,)).start()
 
     def handle_client(self, client_socket):
@@ -112,6 +121,10 @@ class TicTacToeServer:
     
                         if self.check_winner():
                             self.broadcast(f"Game over! Winner: {nickname}\n")
+                            for _, n in self.players:
+                                if n != nickname:
+                                    self.decrement_points(n)
+                            self.increment_points(nickname)
                             self.game_active = False
                         elif ' ' not in self.board:
                             self.broadcast("Game over! It's a draw!\n")
@@ -127,6 +140,10 @@ class TicTacToeServer:
 
                 if self.check_winner():
                     self.broadcast(f"Game over! Winner: {nickname}\n")
+                    for _, n in self.players:
+                            if n != nickname:
+                                self.decrement_points(n)
+                    self.increment_points(nickname)
                     self.game_active = False
                 elif ' ' not in self.board:
                     self.broadcast("Game over! It's a draw!\n")
@@ -185,9 +202,24 @@ def on_exit(server):
     server.save_scoreboard()
 
 if __name__ == "__main__":
+    logging.basicConfig(filename='server.log', level=logging.INFO)
     server = TicTacToeServer()
     server.start()
     atexit.register(on_exit,server)
+    app = Flask(__name__)
+        
+    @app.route('/')
+    def index():
+        server.scoreboard.sort(key=lambda x: x['score'], reverse=True)
+        return render_template('scoreboard.html', scoreboard=server.scoreboard)
+
+    def run_flask():
+        app.run(debug=True, host='0.0.0.0', use_reloader=False)
+
+    # Run Flask app in separate thread
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.start()
+
     while True:
         time.sleep(1)
 
