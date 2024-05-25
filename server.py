@@ -145,7 +145,7 @@ class TicTacToeServer:
                         self.broadcast_board()
     
                         if self.check_winner():
-                            self.broadcast(f"Game over! Winner: {nickname}\n")
+                            self.broadcast(f"Game over! Winner: {nickname}\nScoreboard and history of games can be seen under: http://{SERVER}:5000")
                             for _, n in self.players:
                                 if n != nickname:
                                     loser = n

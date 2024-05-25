@@ -25,6 +25,7 @@ def discover_server():
             discovery_socket.settimeout(2)
             data, server_address = discovery_socket.recvfrom(1024)
             server_ip, server_port = data.decode(FORMAT).split(':')
+            print(f"Discovered server {server_ip}:{int(server_port)}. Connecting to it.")
             return server_ip, int(server_port)
         except socket.timeout:
             attempts += 1
