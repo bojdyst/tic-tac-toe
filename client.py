@@ -1,7 +1,7 @@
 import socket
 import threading
 import os
-
+import ssl
 import socket
 import threading
 import os
@@ -37,7 +37,10 @@ SERVER, PORT = discover_server()
 
 class TicTacToeClient:
     def __init__(self, host=SERVER, port=PORT):
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+        self.context.check_hostname = False
+        self.context.verify_mode = ssl.CERT_NONE
+        self.client_socket = self.context.wrap_socket(socket.socket(socket.AF_INET), server_hostname=host)
         self.client_socket.connect((host, port))
         self.nickname = input("Enter your nickname: ")
         self.client_socket.sendall(self.nickname.encode())

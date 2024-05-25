@@ -8,6 +8,7 @@ import time
 import json
 import os
 from datetime import datetime
+import ssl
 
 PORT = 5050
 SERVER = '0.0.0.0'
@@ -34,6 +35,8 @@ discovery_thread.start()
 
 class TicTacToeServer:
     def __init__(self, host=SERVER, port=PORT):
+        self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        self.context.load_cert_chain(certfile="/home/inzynierka/Desktop/tic-tac-toe/cert.pem", keyfile="/home/inzynierka/Desktop/tic-tac-toe/key.pem")
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_socket.bind((host, port))
@@ -103,6 +106,7 @@ class TicTacToeServer:
         while True:
             client_socket, addr = self.server_socket.accept()
             logging.info(f"Player connected from {addr}")
+            client_socket = self.context.wrap_socket(client_socket, server_side=True)
             threading.Thread(target=self.handle_client, args=(client_socket,)).start()
 
     def handle_client(self, client_socket):
@@ -143,7 +147,6 @@ class TicTacToeServer:
                         self.board[move] = 'X' if self.current_turn == 0 else 'O'
                         self.broadcast(f"Move {move + 1}\n")
                         self.broadcast_board()
-    
                         if self.check_winner():
                             self.broadcast(f"Game over! Winner: {nickname}\nScoreboard and history of games can be seen under: http://{SERVER}:5000")
                             for _, n in self.players:
@@ -156,7 +159,8 @@ class TicTacToeServer:
                             self.game_active = False
                         self.current_turn = 1 - self.current_turn
                     else:
-                        client_socket.sendall("Invalid move! Try again.\n".encode())
+                        # Handle invalid move without sending on the SSL connection
+                        continue
             except socket.timeout:
                 move = self.random_move()
                 self.board[move] = 'X' if self.current_turn == 0 else 'O'
