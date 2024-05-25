@@ -51,6 +51,7 @@ class TicTacToeServer:
         logging.info("Server started, waiting for players...")
 
     def load_history(self):
+        # Load history variable from history.json   
         if not os.path.exists('history.json'):
             with open('history.json', 'w') as file:
                 json.dump([], file)
@@ -58,10 +59,12 @@ class TicTacToeServer:
             return json.load(file)
 
     def save_history(self):
+        # Save current history to history.json
         with open('history.json', 'w') as file:
             json.dump(self.history, file, indent=4)
 
     def load_scoreboard(self):
+        # Load scoreboard variable from scoreboard.json
         if not os.path.exists('scoreboard.json'):
             with open('scoreboard.json', 'w') as file:
                 json.dump([], file)
@@ -69,10 +72,12 @@ class TicTacToeServer:
             return json.load(file)
 
     def save_scoreboard(self):
+        # Save current scoreboard to scoreboard.json
         with open('scoreboard.json', 'w') as file:
             json.dump(self.scoreboard, file, indent=4)
 
     def update_flask(self, winner, loser):
+        # Updates current results available on flask app
         found = False
         # Adds point for a winner
         for entry in self.scoreboard:
@@ -196,10 +201,12 @@ class TicTacToeServer:
 
 
     def random_move(self):
+        # Function taking random move after timeout for user's move
         available_moves = [i for i, v in enumerate(self.board) if v == ' ']
         return random.choice(available_moves)
 
     def check_winner(self):
+        # Check if game is over
         time.sleep(1)
         winning_combinations = [
             [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
@@ -212,6 +219,7 @@ class TicTacToeServer:
         return False
 
     def broadcast(self, message):
+        # Send message to all players
         for player in self.players:
             try:
                 player[0].sendall(message.encode())
@@ -219,6 +227,7 @@ class TicTacToeServer:
                 pass
 
     def broadcast_board(self):
+        # Send current game board to players
         board_display = ""
         for i in range(3):
             row = " | ".join(self.board[i * 3: (i + 1) * 3])
@@ -228,6 +237,7 @@ class TicTacToeServer:
         self.broadcast(board_display)
 
 def on_exit(server):
+    # Save variables to files on exit
     server.save_scoreboard()
     server.save_history()
 
