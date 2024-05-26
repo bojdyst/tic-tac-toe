@@ -6,12 +6,13 @@ import socket
 import threading
 import os
 
-FORMAT = 'utf-8'
-DISCOVERY_PORT = 5051
-MULTICAST_GROUP = '224.0.0.1'
+FORMAT = 'utf-8' # Format of message
+DISCOVERY_PORT = 5051 # Discovery port that is searched for a listening server
+MULTICAST_GROUP = '224.0.0.1' # Multicast group that is searched for a listening server
 MAX_DISCOVERY_ATTEMPTS = 3  # Maximum number of discovery attempts
 
 def discover_server():
+    # Multicast UDP service discovery handler. Allows client to find a listening server
     discovery_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     discovery_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
     discovery_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -32,10 +33,12 @@ def discover_server():
     print("Server discovery failed after {} attempts.".format(MAX_DISCOVERY_ATTEMPTS))
     return None, None
 
+# Set found server info into variables
 SERVER, PORT = discover_server()
 
 class TicTacToeClient:
     def __init__(self, host=SERVER, port=PORT):
+        # Add securing TCP connection with TLS, but skip server authentication because of self-signed cert
         self.context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
         self.context.check_hostname = False
         self.context.verify_mode = ssl.CERT_NONE
@@ -47,10 +50,12 @@ class TicTacToeClient:
         self.game_active = True
 
     def start(self):
+        # Start game thread
         threading.Thread(target=self.receive_messages, daemon=True).start()
         self.play_game()
 
     def receive_messages(self):
+        # Reveive messages from a server
         while self.game_active:
             try:
                 message = self.client_socket.recv(1024).decode()
@@ -76,6 +81,7 @@ class TicTacToeClient:
                 break
 
     def play_game(self):
+        # Main function with logic that handles game
         while self.game_active:
             try:
                 move = input("Enter your move (1-9): ")
@@ -89,6 +95,7 @@ class TicTacToeClient:
                 break
 
     def update_board(self, move):
+        # Update current game board
         symbol = 'X' if self.board.count('X') <= self.board.count('O') else 'O'
         self.board[move] = symbol
 

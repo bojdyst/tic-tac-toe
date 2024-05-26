@@ -23,12 +23,12 @@ def get_server_ip():
         logging.error(f"Could not determine server external IP address: {e}.")
         return '127.0.0.1'
 
-SERVER = get_server_ip()
-PORT = 5050
-ADDR = (SERVER, PORT)
-FORMAT = 'utf-8'
-DISCOVERY_PORT = 5051
-MULTICAST_GROUP = '224.0.0.1'
+SERVER = get_server_ip() # Server IP
+PORT = 5050 # Server game port
+ADDR = (SERVER, PORT) # Server game IP and port
+FORMAT = 'utf-8' # Messages format
+DISCOVERY_PORT = 5051 # Discovery port that server is listening on
+MULTICAST_GROUP = '224.0.0.1' # Discovery multicast group that server is listening on
 
 def handle_discovery():
     # Multicast UDP service discovery handler. Allows clients on the network to discover the server's address by sending a multicast message "DISCOVER_SERVER".
@@ -43,11 +43,13 @@ def handle_discovery():
         if data.decode(FORMAT) == "DISCOVER_SERVER":
             discovery_socket.sendto(f"{SERVER}:{PORT}".encode(FORMAT), addr)
 
+# Start discovery service as a separate thread
 discovery_thread = threading.Thread(target=handle_discovery, daemon=True)
 discovery_thread.start()
 
 class TicTacToeServer:
     def __init__(self, host=SERVER, port=PORT):
+        # Add securing TCP connection with TLS and server's cert and key
         self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         self.context.load_cert_chain(certfile="sample_cert.pem", keyfile="sample_key.pem")
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -90,9 +92,9 @@ class TicTacToeServer:
             json.dump(self.scoreboard, file, indent=4)
 
     def update_flask(self, winner, loser):
-        # Updates current results available on flask app
+        # Update current results available on flask app
         found = False
-        # Adds point for a winner
+        # Add point for a winner
         for entry in self.scoreboard:
             if entry['nickname'] == winner:
                 logging.info(f"+1 point for {winner}.")
@@ -103,13 +105,13 @@ class TicTacToeServer:
             logging.info(f"Adding new player: {winner}.")
             self.scoreboard.append({'nickname': winner, 'score': 1})
         
-        # Removes point for a loser
+        # Remove point for a loser
         for entry in self.scoreboard:
             if entry['nickname'] == loser:
                 logging.info(f"-1 point for {loser}.")
                 entry['score'] -= 1
 
-        # Updates history
+        # Update history
         game_result = {
             'nicknames': f"{winner}-{loser}",
             'winner': winner,
@@ -118,16 +120,20 @@ class TicTacToeServer:
         self.history.append(game_result)
 
     def start(self):
+        # Start game thread
         threading.Thread(target=self.accept_clients, daemon=True).start()
 
     def accept_clients(self):
+        # Accept client connection and create their own socket and thread that handle them
         while True:
             client_socket, addr = self.server_socket.accept()
             logging.info(f"Player connected from {addr}")
+            # Use secure TLS connection
             client_socket = self.context.wrap_socket(client_socket, server_side=True)
             threading.Thread(target=self.handle_client, args=(client_socket,)).start()
 
     def handle_client(self, client_socket):
+        # Main function that handles client connection
         client_socket.sendall("Enter your nickname: ".encode())
         nickname = client_socket.recv(1024).decode().strip()
         self.lock.acquire()
@@ -144,20 +150,22 @@ class TicTacToeServer:
             time.sleep(1)
 
         self.play_game(client_socket, nickname)
-        client_socket.close()  # Close the client socket after the game ends
 
     def start_game(self):
+        # Both players are found and game starts
         for player in self.players:
             player[0].sendall(f"Game starting! Your opponent is {self.players[1 - self.players.index(player)][1]}\n".encode())
         self.broadcast("The game has started!\n")
         self.broadcast_board()
 
     def play_game(self, client_socket, nickname):
+        # Logic for tic-tac-toe game
         while self.game_active:
             self.lock.acquire()
             try:
                 if self.players[self.current_turn][1] == nickname:
                     client_socket.sendall("Your turn! Enter the position (1-9): ".encode())
+                    # Set timeout and if the timeout is reached random move is performed
                     client_socket.settimeout(10.0)
                     move = client_socket.recv(1024).decode().strip()
                     if move.isdigit() and 1 <= int(move) <= 9 and self.board[int(move) - 1] == ' ':
@@ -255,21 +263,25 @@ def on_exit(server):
     server.save_history()
 
 if __name__ == "__main__":
+    # Add logging into server.log file
     logging.basicConfig(filename='server.log', level=logging.INFO)
     server = TicTacToeServer()
     server.start()
     atexit.register(on_exit,server)
     app = Flask(__name__)
         
+    # Main game page
     @app.route('/')
     def indexMain():
         return render_template('main.html')
 
+    # Scoreboard route
     @app.route('/scoreboard')
     def indexScoreboard():
         server.scoreboard.sort(key=lambda x: x['score'], reverse=True)
         return render_template('scoreboard.html', scoreboard=server.scoreboard)
 
+    # History route
     @app.route('/history')
     def indexHistory():
         server.history.sort(key=lambda x: x['date'], reverse=True)
