@@ -56,17 +56,16 @@ class TicTacToeClient:
                 message = self.client_socket.recv(1024).decode()
                 if message:
                     if message.startswith("Move"):
+                        os.system('clear')
                         move = int(message.split()[1]) - 1
                         self.update_board(move)
-                        self.print_board()
                     elif "Game over" in message:
-                        self.print_board()
+                        os.system('clear')
                         print(message)
                         self.game_active = False
                         self.client_socket.close()
                         os._exit(os.EX_OK)
                     else:
-                        self.print_board()
                         print(message)
                 else:
                     self.client_socket.close()
@@ -93,15 +92,6 @@ class TicTacToeClient:
         symbol = 'X' if self.board.count('X') <= self.board.count('O') else 'O'
         self.board[move] = symbol
 
-    def print_board(self):
-        os.system('clear')
-        print("\nCurrent board:")
-        for i in range(3):
-            print(" " + " | ".join(self.board[i*3:(i+1)*3]))
-            if i < 2:
-                print("---+---+---")
-
 if __name__ == "__main__":
     client = TicTacToeClient()
     client.start()
-

@@ -1,91 +1,31 @@
 [
     {
         "nickname": "Marcin",
-        "score": 19
+        "score": 18
     },
     {
         "nickname": "Charlie",
         "score": 11
     },
     {
-        "nickname": "Tomek",
-        "score": 7
-    },
-    {
         "nickname": "Alice",
-        "score": 2
+        "score": 3
     },
     {
         "nickname": "Tomasz",
         "score": 2
     },
     {
-        "nickname": "Bob",
-        "score": 1
-    },
-    {
-        "nickname": "Asa",
-        "score": 1
-    },
-    {
-        "nickname": "Salata",
-        "score": 1
-    },
-    {
-        "nickname": "Halo",
-        "score": 1
-    },
-    {
-        "nickname": "Ciul",
-        "score": 1
-    },
-    {
-        "nickname": "AAA",
-        "score": 1
-    },
-    {
-        "nickname": "TOmasz",
-        "score": 1
-    },
-    {
-        "nickname": "ad",
-        "score": 1
-    },
-    {
-        "nickname": "mame",
-        "score": 1
-    },
-    {
-        "nickname": "Ad",
-        "score": 1
-    },
-    {
-        "nickname": "Aka",
-        "score": 1
-    },
-    {
-        "nickname": "TOmeasz",
-        "score": 1
-    },
-    {
-        "nickname": "Tata",
-        "score": 1
-    },
-    {
-        "nickname": "Mama",
-        "score": 1
-    },
-    {
         "nickname": "BB",
         "score": 1
     },
     {
-        "nickname": "aada",
+        "nickname": "Arek",
         "score": 1
     },
     {
-        "nickname": "Firy",
-        "score": 1
+        "nickname": "Bob",
+        "score": 0
     },
     {
         "nickname": "Adam",
@@ -98,13 +38,5 @@
     {
         "nickname": "Konrad",
         "score": 0
-    },
-    {
-        "nickname": "flanek",
-        "score": 0
-    },
-    {
-        "nickname": "Arek",
-        "score": 1
     }
 ]

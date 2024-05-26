@@ -10,11 +10,8 @@ import os
 from datetime import datetime
 import ssl
 
-FORMAT = 'utf-8'
-DISCOVERY_PORT = 5051
-MULTICAST_GROUP = '224.0.0.1'
-
 def get_server_ip():
+    # Get server IP address by connecting to Google DNS server. If cannot connect, return localhost address
     try:
         temp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         temp_socket.settimeout(2)
@@ -29,8 +26,12 @@ def get_server_ip():
 SERVER = get_server_ip()
 PORT = 5050
 ADDR = (SERVER, PORT)
+FORMAT = 'utf-8'
+DISCOVERY_PORT = 5051
+MULTICAST_GROUP = '224.0.0.1'
 
 def handle_discovery():
+    # Multicast UDP service discovery handler. Allows clients on the network to discover the server's address by sending a multicast message "DISCOVER_SERVER".
     discovery_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     discovery_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     discovery_socket.bind(('', DISCOVERY_PORT))
@@ -165,7 +166,7 @@ class TicTacToeServer:
                         self.broadcast(f"Move {move + 1}\n")
                         self.broadcast_board()
                         if self.check_winner():
-                            self.broadcast(f"Game over! Winner: {nickname}\nScoreboard and history of games can be seen under: http://{SERVER}:5000")
+                            self.broadcast(f"Game over! Winner: {nickname}.\nScoreboard and history of games can be seen under: http://{SERVER}:5000")
                             for _, n in self.players:
                                 if n != nickname:
                                     loser = n
@@ -185,7 +186,7 @@ class TicTacToeServer:
                 self.broadcast_board()
 
                 if self.check_winner():
-                    self.broadcast(f"Game over! Winner: {nickname}\n")
+                    self.broadcast(f"Game over! Winner: {nickname}.\nScoreboard and history of games can be seen under: http://{SERVER}:5000")
                     for _, n in self.players:
                             if n != nickname:
                                 self.decrement_points(n)
@@ -209,8 +210,8 @@ class TicTacToeServer:
                 break
         self.board = [' ' for _ in range(9)]
         self.lock.release()
-        client_socket.close()  # Close the client socket after the game ends
-
+        # Close the client socket after the game ends
+        client_socket.close()  
 
     def random_move(self):
         # Function taking random move after timeout for user's move
@@ -245,7 +246,7 @@ class TicTacToeServer:
             row = " | ".join(self.board[i * 3: (i + 1) * 3])
             board_display += f"{row}\n"
             if i < 2:
-                board_display += "---------\n"
+                board_display += "--+---+--\n"
         self.broadcast(board_display)
 
 def on_exit(server):
