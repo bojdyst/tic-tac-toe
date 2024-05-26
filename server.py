@@ -126,11 +126,12 @@ class TicTacToeServer:
     def accept_clients(self):
         # Accept client connection and create their own socket and thread that handle them
         while True:
-            client_socket, addr = self.server_socket.accept()
-            logging.info(f"Player connected from {addr}")
-            # Use secure TLS connection
-            client_socket = self.context.wrap_socket(client_socket, server_side=True)
-            threading.Thread(target=self.handle_client, args=(client_socket,)).start()
+            if len(self.players) < 1:
+                client_socket, addr = self.server_socket.accept()
+                logging.info(f"Player connected from {addr}")
+                # Use secure TLS connection
+                client_socket = self.context.wrap_socket(client_socket, server_side=True)
+                threading.Thread(target=self.handle_client, args=(client_socket,)).start()
 
     def handle_client(self, client_socket):
         # Main function that handles client connection
