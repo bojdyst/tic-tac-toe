@@ -1,5 +1,35 @@
 [
     {
+        "nicknames": "Tomek-Franek",
+        "winner": "Tomek",
+        "date": "2024-05-26 17:02:36"
+    },
+    {
+        "nicknames": "Tomek-Franek",
+        "winner": "Tomek",
+        "date": "2024-05-26 16:54:05"
+    },
+    {
+        "nicknames": "Firy-Eryk",
+        "winner": "Firy",
+        "date": "2024-05-25 17:22:17"
+    },
+    {
+        "nicknames": "aada-dasda",
+        "winner": "aada",
+        "date": "2024-05-25 17:21:58"
+    },
+    {
+        "nicknames": "BB-Adam",
+        "winner": "BB",
+        "date": "2024-05-25 17:20:07"
+    },
+    {
+        "nicknames": "Mama-Taka",
+        "winner": "Mama",
+        "date": "2024-05-25 17:18:55"
+    },
+    {
         "nicknames": "Tata-Mama",
         "winner": "Tata",
         "date": "2024-05-25 17:16:16"
@@ -90,13 +120,8 @@
         "date": "2024-05-25 10:38:14"
     },
     {
-        "nicknames": "Mama-Taka",
-        "winner": "Mama",
-        "date": "2024-05-25 17:18:55"
-    },
-    {
-        "nicknames": "BB-Adam",
-        "winner": "BB",
-        "date": "2024-05-25 17:20:07"
+        "nicknames": "Arek-Marysia",
+        "winner": "Arek",
+        "date": "2024-05-26 17:10:15"
     }
 ]

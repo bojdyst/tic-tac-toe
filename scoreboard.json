@@ -9,7 +9,7 @@
     },
     {
         "nickname": "Tomek",
-        "score": 4
+        "score": 6
     },
     {
         "nickname": "Alice",
@@ -56,10 +56,6 @@
         "score": 1
     },
     {
-        "nickname": "Adam",
-        "score": 0
-    },
-    {
         "nickname": "Ad",
         "score": 1
     },
@@ -80,6 +76,22 @@
         "score": 1
     },
     {
+        "nickname": "BB",
+        "score": 1
+    },
+    {
+        "nickname": "aada",
+        "score": 1
+    },
+    {
+        "nickname": "Firy",
+        "score": 1
+    },
+    {
+        "nickname": "Adam",
+        "score": 0
+    },
+    {
         "nickname": "Ala",
         "score": 0
     },
@@ -92,7 +104,7 @@
         "score": 0
     },
     {
-        "nickname": "BB",
+        "nickname": "Arek",
         "score": 1
     }
 ]

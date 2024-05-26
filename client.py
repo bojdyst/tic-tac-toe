@@ -6,7 +6,6 @@ import socket
 import threading
 import os
 
-PORT = 5050
 FORMAT = 'utf-8'
 DISCOVERY_PORT = 5051
 MULTICAST_GROUP = '224.0.0.1'

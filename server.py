@@ -10,12 +10,25 @@ import os
 from datetime import datetime
 import ssl
 
-PORT = 5050
-SERVER = '0.0.0.0'
-ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCOVERY_PORT = 5051
 MULTICAST_GROUP = '224.0.0.1'
+
+def get_server_ip():
+    try:
+        temp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        temp_socket.settimeout(2)
+        temp_socket.connect(('8.8.8.8', 1))
+        ip_address = temp_socket.getsockname()[0]
+        temp_socket.close()
+        return ip_address
+    except Exception as e:
+        logging.error(f"Could not determine server external IP address: {e}.")
+        return '127.0.0.1'
+
+SERVER = get_server_ip()
+PORT = 5050
+ADDR = (SERVER, PORT)
 
 def handle_discovery():
     discovery_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -24,7 +37,6 @@ def handle_discovery():
     group = socket.inet_aton(MULTICAST_GROUP)
     mreq = group + socket.inet_aton('0.0.0.0')
     discovery_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-    
     while True:
         data, addr = discovery_socket.recvfrom(1024)
         if data.decode(FORMAT) == "DISCOVER_SERVER":
