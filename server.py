@@ -48,7 +48,7 @@ discovery_thread.start()
 class TicTacToeServer:
     def __init__(self, host=SERVER, port=PORT):
         self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        self.context.load_cert_chain(certfile="/home/inzynierka/Desktop/tic-tac-toe/cert.pem", keyfile="/home/inzynierka/Desktop/tic-tac-toe/key.pem")
+        self.context.load_cert_chain(certfile="sample_cert.pem", keyfile="sample_key.pem")
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_socket.bind((host, port))
