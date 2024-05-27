@@ -205,8 +205,7 @@ class TicTacToeServer:
                     self.broadcast("Game over! It's a draw!\n")
                     self.game_active = False
                 self.current_turn = 1 - self.current_turn
-
-            #TODO: close second player socket
+            # If any player ends the connection, the game is stopped and both clients are getting disconnected.
             except ssl.SSLEOFError:
                 logging.error("SSL EOF error occurred. Connection closed by client.")
                 self.game_active = False
@@ -217,7 +216,10 @@ class TicTacToeServer:
                         break
                 for player_socket, player_nickname in self.players:
                     if player_nickname != disconnected_player:
-                        player_socket.sendall(f"Your opponent {disconnected_player} has left the game. You win by default.\n".encode())
+                        player_socket.sendall(f"Your opponent {disconnected_player} has left the game. Please play another one.".encode())
+                        player_socket.shutdown(socket.SHUT_RDWR)
+                        player_socket.close()
+            # If any player ends the connection, the game is stopped and both clients are getting disconnected.
             except ConnectionResetError:
                 logging.error("Connection reset by peer.")
                 self.game_active = False
@@ -228,7 +230,9 @@ class TicTacToeServer:
                         break
                 for player_socket, player_nickname in self.players:
                     if player_nickname != disconnected_player:
-                        player_socket.sendall(f"Your opponent {disconnected_player} has left the game. You win by default.\n".encode())
+                        player_socket.sendall(f"Your opponent {disconnected_player} has left the game. Please play another one.".encode())
+                        player_socket.shutdown(socket.SHUT_RDWR)
+                        player_socket.close()
             finally:
                 self.lock.release()
                 time.sleep(1)
@@ -319,4 +323,3 @@ if __name__ == "__main__":
 
     while True:
         time.sleep(1)
-

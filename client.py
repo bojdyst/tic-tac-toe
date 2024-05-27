@@ -70,6 +70,9 @@ class TicTacToeClient:
                         self.game_active = False
                         self.client_socket.close()
                         os._exit(os.EX_OK)
+                    elif message.endswith("has left the game. Please play another one."):
+                        print(message)
+                        os._exit(os.EX_OK)
                     else:
                         print(message)
                 else:
