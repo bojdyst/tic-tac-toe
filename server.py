@@ -135,7 +135,7 @@ class TicTacToeServer:
 
     def handle_client(self, client_socket):
         # Main function that handles client connection
-        client_socket.sendall("Enter your nickname: ".encode())
+        #client_socket.sendall("Enter your nickname: ".encode())
         nickname = client_socket.recv(1024).decode().strip()
         self.lock.acquire()
         self.players.append((client_socket, nickname))
@@ -197,9 +197,9 @@ class TicTacToeServer:
                 if self.check_winner():
                     self.broadcast(f"Game over! Winner: {nickname}.\nScoreboard and history of games can be seen under: http://{SERVER}:5000")
                     for _, n in self.players:
-                            if n != nickname:
-                                self.decrement_points(n)
-                    self.increment_points(nickname)
+                        if n != nickname:
+                            loser = n
+                    self.update_flask(nickname, loser)
                     self.game_active = False
                 elif ' ' not in self.board:
                     self.broadcast("Game over! It's a draw!\n")

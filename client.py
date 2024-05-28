@@ -87,7 +87,7 @@ class TicTacToeClient:
         # Main function with logic that handles game
         while self.game_active:
             try:
-                move = input("Enter your move (1-9): ")
+                move = input()
                 if move.isdigit() and 1 <= int(move) <= 9 and self.board[int(move) - 1] == ' ':
                     self.client_socket.sendall(move.encode())
                 else:
