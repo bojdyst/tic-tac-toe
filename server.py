@@ -135,7 +135,6 @@ class TicTacToeServer:
 
     def handle_client(self, client_socket):
         # Main function that handles client connection
-        #client_socket.sendall("Enter your nickname: ".encode())
         nickname = client_socket.recv(1024).decode().strip()
         self.lock.acquire()
         self.players.append((client_socket, nickname))

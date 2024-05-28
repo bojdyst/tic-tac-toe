@@ -1,72 +1,17 @@
 [
     {
-        "nicknames": "Alice-Bob",
-        "winner": "Alice",
-        "date": "2024-05-26 17:58:30"
+        "nicknames": "Szymon-Franek",
+        "winner": "Szymon",
+        "date": "2024-05-28 21:47:06"
     },
     {
-        "nicknames": "Bob-Alice",
-        "winner": "Bob",
-        "date": "2024-05-26 17:58:07"
+        "nicknames": "Szymon-Marcin",
+        "winner": "Szymon",
+        "date": "2024-05-28 21:46:43"
     },
     {
-        "nicknames": "Alice-Bob",
-        "winner": "Alice",
-        "date": "2024-05-26 17:58:06"
-    },
-    {
-        "nicknames": "Bob-Alice",
-        "winner": "Bob",
-        "date": "2024-05-26 17:48:10"
-    },
-    {
-        "nicknames": "Alice-Bob",
-        "winner": "Alice",
-        "date": "2024-05-26 17:47:26"
-    },
-    {
-        "nicknames": "Alice-Marcin",
-        "winner": "Alice",
-        "date": "2024-05-26 17:29:55"
-    },
-    {
-        "nicknames": "Arek-Marysia",
-        "winner": "Arek",
-        "date": "2024-05-26 17:10:15"
-    },
-    {
-        "nicknames": "BB-Adam",
-        "winner": "BB",
-        "date": "2024-05-25 17:20:07"
-    },
-    {
-        "nicknames": "Tata-Mama",
-        "winner": "Tata",
-        "date": "2024-05-26 20:54:23"
-    },
-    {
-        "nicknames": "TOmek-Franek",
-        "winner": "TOmek",
-        "date": "2024-05-26 20:54:46"
-    },
-    {
-        "nicknames": "TOmek-Mama",
-        "winner": "TOmek",
-        "date": "2024-05-26 20:57:43"
-    },
-    {
-        "nicknames": "Tomek-Mama",
+        "nicknames": "Tomek-Szymon",
         "winner": "Tomek",
-        "date": "2024-05-26 20:59:55"
-    },
-    {
-        "nicknames": "Mama-Tata",
-        "winner": "Mama",
-        "date": "2024-05-26 21:03:04"
-    },
-    {
-        "nicknames": "Tata-Mama",
-        "winner": "Tata",
-        "date": "2024-05-26 21:28:39"
+        "date": "2024-05-28 21:46:06"
     }
 ]
